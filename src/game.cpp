@@ -1,6 +1,7 @@
 #include"game.h"
 #include"sceneMain.h"
 #include<SDL.h>
+#include<SDL_image.h>
 Game::Game(){
 
 }
@@ -14,12 +15,14 @@ void Game::clean(){
         currentScene->clean();
         delete currentScene;
     }
+    IMG_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
 void Game::init(){
+    frameTime=1000/FPS; //每帧的时间间隔//1s=1000ms
     //SDL初始化
     //如果初始化失败
     if(SDL_Init(SDL_INIT_EVERYTHING)!=0){
@@ -38,17 +41,33 @@ void Game::init(){
         SDL_LogError(SDL_LOG_CATEGORY_ERROR,"SDL_CreateRenderer Error: %s", SDL_GetError());
         isRunning=false;
     }
-    
+    //初始化SDL_image
+    if(IMG_Init(IMG_INIT_PNG)!=IMG_INIT_PNG){
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR,"IMG_Init Error: %s", SDL_GetError());
+        isRunning=false;
+    }
     currentScene=new SceneMain(); //SceneMain是一个继承自Scene的类
+    currentScene->init(); //初始化当前场景
+    
 }
 
 void Game::run(){
     while(isRunning){
+        auto frameStart=SDL_GetTicks(); //获取当前时间戳
         SDL_Event event;
         handleEvent(&event);
-
-        update();
+        
+        update(deltaTime);
         render();
+        auto frameEnd=SDL_GetTicks(); //获取当前时间戳
+        auto diff=frameEnd-frameStart; //计算帧间隔
+        if(diff<frameTime){
+            SDL_Delay(frameTime-diff);//如果帧间隔小于每帧的时间间隔，则延迟一段时间
+            deltaTime=frameTime/1000.0f; //将帧间隔转换为秒
+        }
+        else{
+            deltaTime=diff/1000.0f; //将帧间隔转换为秒
+        }   
     }
 }
 
@@ -71,8 +90,8 @@ void Game::handleEvent(SDL_Event* event){
     }    
 }
 
-void Game::update(){
-    currentScene->update();
+void Game::update(float deltaTime){
+    currentScene->update(deltaTime);
 }
 
 void Game::render(){

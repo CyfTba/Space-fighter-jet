@@ -6,7 +6,7 @@
 #include<SDL_mixer.h>
 #include"game.h"
 int main(int argc, char* argv[]) {
-    Game game;
+    Game& game=Game::getInstance();
     game.init();
     game.run();
     
