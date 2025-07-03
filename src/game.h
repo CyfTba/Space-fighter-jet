@@ -2,6 +2,11 @@
 
 #include"scene.h"
 #include<SDL.h>
+#include"object.h"
+#include<SDL.h>
+#include<SDL_image.h>
+#include<SDL_ttf.h>
+#include<string>
 //单例模式
 class Game{
     public:
@@ -26,6 +31,9 @@ class Game{
         int getWindowHeight() const {
             return windowheight;
         }
+        void BackUpdata(float deltaTime);
+        void RenderBack();
+        void RenderText(std::string text,float posY,bool isTitle);
     private:
         Game();
         Game(const Game&)=delete;
@@ -40,5 +48,10 @@ class Game{
         int FPS=60;
         Uint32 frameTime;
         float deltaTime;//每帧的时间间隔，单位为秒
-     
+
+        Back nearStars;
+        Back farStars;
+        
+        TTF_Font* TitleFont;//标题字体
+        TTF_Font* TextFont;//文本字体
 };
