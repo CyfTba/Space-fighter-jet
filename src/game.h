@@ -7,6 +7,7 @@
 #include<SDL_image.h>
 #include<SDL_ttf.h>
 #include<string>
+#include<map>
 //单例模式
 class Game{
     public:
@@ -33,7 +34,26 @@ class Game{
         }
         void BackUpdata(float deltaTime);
         void RenderBack();
-        void RenderText(std::string text,float posY,bool isTitle);
+        SDL_Point RenderText(std::string text,float posY,bool isTitle);
+        void RenderTextPos(std::string text,int posX,int posY);
+
+        void setFinalScore(int score){
+            finalScore=score;
+        }
+
+        int getFinalScore()const{
+            return finalScore;
+        }
+        void insertLeaderboard(int score, const std::string& name) {
+            leaderboard.insert({score, name});
+            if(leaderboard.size() > 8) {
+                leaderboard.erase(std::prev(leaderboard.end()));
+            }
+        }
+        std::multimap<int,std::string,std::greater<int>>& getLeaderboard(){return leaderboard;}
+
+        void saveData();
+        void loadData();
     private:
         Game();
         Game(const Game&)=delete;
@@ -54,4 +74,6 @@ class Game{
         
         TTF_Font* TitleFont;//标题字体
         TTF_Font* TextFont;//文本字体
+        int finalScore=0;
+        std::multimap<int,std::string,std::greater<int>> leaderboard; //排行榜，存储得分和玩家名字
 };

@@ -5,12 +5,13 @@
 #include<SDL_ttf.h>
 #include<SDL_mixer.h>
 #include"scenetitle.h"
-
+#include<fstream>
 Game::Game(){
 
 }
 
 Game::~Game(){
+    saveData(); //在游戏结束时保存得分
     clean();
 }
 
@@ -112,7 +113,9 @@ void Game::init(){
     //设置字体
     TitleFont=TTF_OpenFont("assets/font/VonwaonBitmap-16px.ttf",64); 
     TextFont=TTF_OpenFont("assets/font/VonwaonBitmap-16px.ttf",32);
-
+    
+    //载入得分
+    loadData();
 
     currentScene=new SceneTitle(); //SceneMain是一个继承自Scene的类
     currentScene->init(); //初始化当前场景
@@ -126,7 +129,7 @@ void Game::run(){
     while(isRunning){
         auto frameStart=SDL_GetTicks(); //获取当前时间戳
         SDL_Event event;
-        handleEvent(&event);
+        handleEvent(&event);//处理场景事件
         
         update(deltaTime);
         render();
@@ -205,7 +208,7 @@ void Game::RenderBack(){
     }
 }
 
- void Game::RenderText(std::string text,float posY,bool isTitle){
+SDL_Point Game::RenderText(std::string text,float posY,bool isTitle){
     SDL_Color color={255,255,255,255};
     SDL_Surface* surface=nullptr;
     if(isTitle){
@@ -225,4 +228,46 @@ void Game::RenderBack(){
     SDL_RenderCopy(renderer,texture,nullptr,&textRect); //将纹理渲染到渲染器上
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
+    return SDL_Point{static_cast<int>(textRect.x+textRect.w), static_cast<int>(textRect.y)}; //返回文本的渲染右上角
  }
+
+void Game::RenderTextPos(std::string text,int posX,int posY){
+    SDL_Color color={255,255,255,255};
+    SDL_Surface* surface=nullptr;
+    surface=TTF_RenderUTF8_Solid(TextFont,text.c_str(),color);//创建一个图像表面
+    SDL_Texture* texture=SDL_CreateTextureFromSurface(renderer,surface);
+    SDL_Rect textRect={
+        posX,
+        posY,
+        surface->w,
+        surface->h
+    };
+    SDL_RenderCopy(renderer,texture,nullptr,&textRect); //将纹理渲染到渲染器上
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}
+
+void Game::saveData(){
+    std::ofstream file("assets/save.dat");
+    if(!file.is_open()){
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to open save file: %s", "assets/save.dat");
+        return;
+    }
+    for(auto it:leaderboard){
+        file<<it.first<<" "<<it.second<<std::endl; //将得分和玩家名字写入文件
+    }
+}
+void Game::loadData(){
+    std::ifstream file("assets/save.dat");
+    if(!file.is_open()){
+        SDL_Log("Failed to open save file");
+        return;
+    }
+    leaderboard.clear();
+    int score;
+    std::string name;
+    while(file>>score>>name){
+        leaderboard.insert({score,name}); //将得分和玩家名字插入排行榜
+    }
+    file.close();
+}

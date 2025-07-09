@@ -1,6 +1,6 @@
 #pragma once
 #include<SDL.h>
-class Game;
+class Game;//前向声明Game类 
 class Scene{
     public:
     Scene();

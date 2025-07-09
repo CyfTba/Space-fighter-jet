@@ -60,13 +60,14 @@ void SceneMain::init(){
     //初始化敌人子弹模板
     ProjectileEnemyTemplate.texture=IMG_LoadTexture(game.getRenderer(),"assets/image/bullet-2.png");
     SDL_QueryTexture( ProjectileEnemyTemplate.texture,nullptr,nullptr,& ProjectileEnemyTemplate.width,& ProjectileEnemyTemplate.height);
-    ProjectileEnemyTemplate.width= ProjectileEnemyTemplate.width/4;
-    ProjectileEnemyTemplate.height= ProjectileEnemyTemplate.height/4;
+    ProjectileEnemyTemplate.width= ProjectileEnemyTemplate.width/2;
+    ProjectileEnemyTemplate.height= ProjectileEnemyTemplate.height/2;
 
     //初始化爆炸模板
     ExplosionTemplate.texture=IMG_LoadTexture(game.getRenderer(),"assets/effect/explosion.png");
     SDL_QueryTexture(ExplosionTemplate.texture,nullptr,nullptr,& ExplosionTemplate.width,&ExplosionTemplate.height);
     ExplosionTemplate.totalFrames=ExplosionTemplate.width/ ExplosionTemplate.height;
+    ExplosionTemplate.height= ExplosionTemplate.height*2;
     ExplosionTemplate.width= ExplosionTemplate.height;
 
     //初始化掉落物品模板
@@ -86,6 +87,7 @@ void SceneMain::update(float deltaTime){
     updateExplosions(deltaTime); //更新爆炸效果
     updateItems(deltaTime);//更新掉落物品状态
     if(isDead){
+
         ChangeSceneEnd(deltaTime,2.0f); //如果玩家死亡，切换到结束场景
     }
 }
@@ -254,6 +256,7 @@ void SceneMain::updatePlayer(float deltaTime){
         explosion->startTime=currentTime;
         explosions.push_back(explosion);
         Mix_PlayChannel(-1,sounds["player_explosion"],0);
+        game.setFinalScore(score); //设置最终得分
         return;
     }
     for(auto it:enemies){
@@ -487,7 +490,7 @@ void SceneMain::updateExplosions(float deltaTime){
 
 void SceneMain::renderExplosions(){
     for(auto it:explosions){
-        SDL_Rect src={it->currentFrame*it->width,0,it->width,it->height};
+        SDL_Rect src={it->currentFrame*it->width,0,it->width/2,it->height/2};
         SDL_Rect dst={static_cast<int>(it->position.x),static_cast<int>(it->position.y),it->width,it->height};
         SDL_RenderCopy(game.getRenderer(),it->texture,&src,&dst);//将texture中指定的src区域渲染到dst中
     }
