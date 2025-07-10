@@ -15,6 +15,7 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/src SRC)
 
 include_directories(${CMAKE_SOURCE_DIR}/SDL2/include/SDL2/)
 link_directories(${CMAKE_SOURCE_DIR}/SDL2/lib/)
-add_executable(${TARGET} ${SRC})
+
+add_executable(${TARGET} ${SRC} "resources.rc")
 
 target_link_libraries(${TARGET} SDL2main SDL2 SDL2_image SDL2_mixer SDL2_ttf)

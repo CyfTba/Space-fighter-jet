@@ -1,0 +1,5 @@
+//MAINICON:图标名称，可随意取
+//ICON：指定资源类型是图标
+//"icon.ico":图标路径
+
+MAINICON ICON "icon.ico"
