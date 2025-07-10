@@ -19,3 +19,8 @@ link_directories(${CMAKE_SOURCE_DIR}/SDL2/lib/)
 add_executable(${TARGET} ${SRC} "resources.rc")
 
 target_link_libraries(${TARGET} SDL2main SDL2 SDL2_image SDL2_mixer SDL2_ttf)
+
+if(MINGW)
+    target_link_options(${TARGET} PRIVATE "-mwindows")
+
+endif()
